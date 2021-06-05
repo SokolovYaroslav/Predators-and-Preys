@@ -318,6 +318,16 @@ void reset(FGame* F){
     F -> al = F -> num_preys;
     
     FGame G = *F;
+  
+    for(int i=0; i<G.num_preys; i++){
+        G.prey_mask[i] = 0;
+        G.preys_reward[i] = 0;
+    }
+    
+    for(int i=0; i<G.num_preds; i++){
+        G.pred_mask[i] = 0;
+        G.preds_reward[i] = 0;
+    }
     
     for(int i=0; i<G.num_obstacles; i++){
         double r = double_rand() * (G.r_obst_ub - G.r_obst_lb) + G.r_obst_lb;
