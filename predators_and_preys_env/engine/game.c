@@ -169,10 +169,6 @@ void step(FGame* F, double* action_preys, double* action_predators){
                     this_corrected += force_not_intersect(&G.preys[i], &G.preys[j]);
                 }
             }
-            if(!this_corrected){
-                for(int j=0; j<G.num_obstacles; j++)
-                    this_corrected += force_not_intersect(&G.preys[i], &G.obstacles[j]);
-            }
             corrected += this_corrected;
             force_clip_position(&G.preys[i], -G.x_limit, -G.y_limit, G.x_limit, G.y_limit);
         }
@@ -211,10 +207,6 @@ void step(FGame* F, double* action_preys, double* action_predators){
                         continue;
                     this_corrected += force_not_intersect(&G.predators[i], &G.predators[j]);
                 }
-            }
-            if(!this_corrected){
-                for(int j=0; j<G.num_obstacles; j++)
-                    this_corrected += force_not_intersect(&G.predators[i], &G.obstacles[j]);
             }
             corrected += this_corrected;
             force_clip_position(&G.predators[i], -G.x_limit, -G.y_limit, G.x_limit, G.y_limit);
