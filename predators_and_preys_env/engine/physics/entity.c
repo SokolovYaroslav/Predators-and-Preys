@@ -43,7 +43,7 @@ double real_distance(entity* Ent, entity* Other){
 }
 
 int is_intersect(entity* Ent, entity* Other){
-    return center_distance(Ent, Other) <= (Ent -> radius + Other -> radius) ? 1 : 0;
+    return center_distance(Ent, Other) < (Ent -> radius + Other -> radius) ? 1 : 0;
 }
 
 
@@ -69,13 +69,13 @@ void force_clip_position(entity* Ent, double min_x, double min_y, double max_x, 
 
     double r = Ent -> radius;
     
-    if (Ent -> position[0] < r + min_x)
-        Ent -> position[0] = r + min_x;
-    else if (Ent -> position[0] > max_x - r)
-        Ent -> position[0] = max_x - r;
+    if (Ent -> position[0] < min_x + r + 1e-2)
+        Ent -> position[0] = min_x + r + 1e-2;
+    else if (Ent -> position[0] > max_x - r - 1e-2)
+        Ent -> position[0] = max_x - r - 1e-2;
         
-    if (Ent -> position[1] < r + min_y)
-        Ent -> position[1] = r + min_y;
-    else if (Ent -> position[1] > max_y - r)
-        Ent -> position[1] = max_y - r;
+    if (Ent -> position[1] < min_y + r + 1e-2)
+        Ent -> position[1] = min_y + r + 1e-2;
+    else if (Ent -> position[1] > max_y - r - 1e-2)
+        Ent -> position[1] = max_y - r - 1e-2;
 }
