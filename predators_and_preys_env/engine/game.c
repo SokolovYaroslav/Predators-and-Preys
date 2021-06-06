@@ -176,13 +176,13 @@ void step(FGame* F, double* action_preys, double* action_predators){
         if (!corrected)
             break;
             
-        if (it_num > G.num_preys * G.num_preys){
+        if (it_num > 3 * G.num_preys){
             it_num = 0;
             shuffle_array(G.prey_order, G.num_preys);
             shuffle_count += 1;
         }
         
-        if (shuffle_count > G.num_preys * G.num_preys * 3)
+        if (shuffle_count > 3 * G.num_preys)
            corrected = 0;
            
         it_num += 1;
@@ -215,13 +215,13 @@ void step(FGame* F, double* action_preys, double* action_predators){
         if (!corrected)
             break;
  
-        if (it_num > G.num_preds * G.num_preds){
+        if (it_num > 3 * G.num_preds){
             it_num = 0;
             shuffle_array(G.pred_order, G.num_preds);
             shuffle_count += 1;
         }
  
-        if (shuffle_count > G.num_preds * G.num_preds * 3)
+        if (shuffle_count > 3 * G.num_preds)
            corrected = 0;
  
         it_num += 1;
