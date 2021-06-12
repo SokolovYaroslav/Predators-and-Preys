@@ -8,18 +8,18 @@ class Game:
         self.predators = []
         self.preys = []
         self.obstacles = []
-        self.x_limit = config["x_limit"]      # 16
-        self.y_limit = config["y_limit"]      # 16
+        self.x_limit = config["x_limit"]  # 16
+        self.y_limit = config["y_limit"]  # 16
         self.num_preds = config["num_preds"]  # 3
         self.num_preys = config["num_preys"]  # 5
         self.num_obsts = config["num_obsts"]  # 10
 
         self.obstacle_r_b = config["obstacle_radius_bounds"]  # 0.6 .. 1.2
-        self.prey_radius = config["prey_radius"]              # 0.8
-        self.predator_radius = config["predator_radius"]      # 1.0
-        self.predator_speed = config["predator_speed"]        # 1.0
-        self.prey_speed = config["prey_speed"]                # 1.2
-        self.world_timestep = config["world_timestep"]        # 1/60
+        self.prey_radius = config["prey_radius"]  # 0.8
+        self.predator_radius = config["predator_radius"]  # 1.0
+        self.predator_speed = config["predator_speed"]  # 1.0
+        self.prey_speed = config["prey_speed"]  # 1.2
+        self.world_timestep = config["world_timestep"]  # 1/60
 
         self.random = random.Random()
 
@@ -27,32 +27,23 @@ class Game:
         self.random = random.Random(seed)
 
     def get_state_dict(self):
-        state_dict = {
-            "predators": [],
-            "preys": [],
-            "obstacles": []
-        }
+        state_dict = {"predators": [], "preys": [], "obstacles": []}
         for e in self.predators:
-            state_dict["predators"].append({
-                "x_pos": e.position[0],
-                "y_pos": e.position[1],
-                "radius": e.radius,
-                "speed": e.speed
-            })
+            state_dict["predators"].append(
+                {"x_pos": e.position[0], "y_pos": e.position[1], "radius": e.radius, "speed": e.speed}
+            )
         for is_alive, e in self.preys:
-            state_dict["preys"].append({
-                "x_pos": e.position[0],
-                "y_pos": e.position[1],
-                "radius": e.radius,
-                "speed": e.speed,
-                "is_alive": is_alive
-            })
+            state_dict["preys"].append(
+                {
+                    "x_pos": e.position[0],
+                    "y_pos": e.position[1],
+                    "radius": e.radius,
+                    "speed": e.speed,
+                    "is_alive": is_alive,
+                }
+            )
         for e in self.obstacles:
-            state_dict["obstacles"].append({
-                "x_pos": e.position[0],
-                "y_pos": e.position[1],
-                "radius": e.radius
-            })
+            state_dict["obstacles"].append({"x_pos": e.position[0], "y_pos": e.position[1], "radius": e.radius})
         return state_dict
 
     def step(self, actions):
@@ -116,7 +107,7 @@ class Game:
             r = self.random.random() * (self.obstacle_r_b[1] - self.obstacle_r_b[0]) + self.obstacle_r_b[0]
             x = (2 * self.random.random() - 1) * (self.x_limit - r)
             y = (2 * self.random.random() - 1) * (self.y_limit - r)
-            self.obstacles.append(Entity(r, 0., x, y))
+            self.obstacles.append(Entity(r, 0.0, x, y))
 
         self.preys = []
         for _ in range(self.num_preys):
