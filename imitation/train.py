@@ -1,4 +1,5 @@
 import json
+from typing import List, Tuple
 
 import torch
 from torch.nn import MSELoss
@@ -10,8 +11,18 @@ from imitation.dataloader import ImitationDataset
 from imitation.model import ImitationModel
 
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def collate_fn(batch: List[Tuple[List[float], float]]) -> Tuple[torch.Tensor, torch.Tensor]:
+    xs, ys = zip(*batch)
+    return (
+        torch.tensor(xs, device=device, dtype=torch.float),
+        torch.tensor(ys, device=device, dtype=torch.float),
+    )
+
+
 def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     dicts = []
     with open("imitation/states.jsonl") as f:
@@ -20,10 +31,20 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
     predator_dataset = ImitationDataset(predator=True, dicts=dicts)
     prey_dataset = ImitationDataset(predator=False, dicts=dicts)
     predator_dataloader = DataLoader(
-        predator_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, shuffle=True
+        predator_dataset,
+        batch_size=batch_size,
+        pin_memory=True,
+        num_workers=num_workers,
+        shuffle=True,
+        collate_fn=collate_fn,
     )
     prey_dataloader = DataLoader(
-        prey_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, shuffle=True
+        prey_dataset,
+        batch_size=batch_size,
+        pin_memory=True,
+        num_workers=num_workers,
+        shuffle=True,
+        collate_fn=collate_fn,
     )
 
     pred_shape = len(predator_dataset[0][0])
@@ -47,7 +68,6 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         for batch in bar:
             predator_opt.zero_grad()
             x, y = batch
-            x, y = x.to(device), y.to(device)
             y_pred = predator_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
@@ -64,7 +84,6 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         for batch in bar:
             prey_opt.zero_grad()
             x, y = batch
-            x, y = x.to(device), y.to(device)
             y_pred = prey_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
