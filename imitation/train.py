@@ -14,16 +14,11 @@ from imitation.model import ImitationModel
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def collate_fn(batch: List[Tuple[List[float], float]]) -> Tuple[torch.Tensor, torch.Tensor]:
-    xs, ys = zip(*batch)
-    return (
-        torch.tensor(xs, device=device, dtype=torch.float),
-        torch.tensor(ys, device=device, dtype=torch.float),
-    )
+def collate_fn(batch: List[Tuple[List[float], float]]) -> Tuple[List[List[float]], List[float]]:
+    return zip(*batch)
 
 
 def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
-
     dicts = []
     with open("imitation/states.jsonl") as f:
         for line in tqdm(f, desc="Loading file to dataset..."):
@@ -68,6 +63,7 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         for batch in bar:
             predator_opt.zero_grad()
             x, y = batch
+            x, y = torch.tensor(x, device=device, dtype=torch.float), torch.tensor(y, device=device, dtype=torch.float)
             y_pred = predator_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
@@ -84,6 +80,7 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         for batch in bar:
             prey_opt.zero_grad()
             x, y = batch
+            x, y = torch.tensor(x, device=device, dtype=torch.float), torch.tensor(y, device=device, dtype=torch.float)
             y_pred = prey_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
