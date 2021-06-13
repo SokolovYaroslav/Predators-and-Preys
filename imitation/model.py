@@ -17,12 +17,12 @@ class ImitationModel(nn.Module):
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.LayerNorm(256),
-            # nn.Linear(256, 1),
-            # nn.Tanh(),
-            nn.Linear(256, 2),
+            nn.Linear(256, 1),
+            nn.Tanh(),
+            # nn.Linear(256, 2),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # return self.model(x)
-        xy = self.model(x)
-        return torch.atan2(xy[:, 0], xy[:, 1]).unsqueeze(1) / math.pi
+        return self.model(x)
+        # xy = self.model(x)
+        # return torch.atan2(xy[:, 0], xy[:, 1]).unsqueeze(1) / math.pi

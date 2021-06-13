@@ -14,27 +14,22 @@ class ImitationModel(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(input_dim, 256),
             nn.ReLU(),
+            nn.LayerNorm(256),
             nn.Linear(256, 512),
             nn.ReLU(),
+            nn.LayerNorm(512),
             nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(256, 1),
-            nn.Tanh(),
+            nn.LayerNorm(256),
+            # nn.Linear(256, 1),
+            # nn.Tanh(),
+            nn.Linear(256, 2),
         )
-        # self.model = nn.Sequential(
-        #     nn.Linear(input_dim, 256),
-        #     nn.ReLU(),
-        #     nn.Linear(256, 512),
-        #     nn.ReLU(),
-        #     nn.Linear(512, 256),
-        #     nn.ReLU(),
-        #     nn.Linear(256, 2),
-        # )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.model(x)
-        # xy = self.model(x)
-        # return torch.atan2(xy[:, 0], xy[:, 1]) / math.pi
+        # return self.model(x)
+        xy = self.model(x)
+        return torch.atan2(xy[:, 0], xy[:, 1]).unsqueeze(1) / math.pi
 
 
 def prepare_xs(state: dict, predator: bool) -> List[List[float]]:
@@ -66,6 +61,7 @@ class PredatorAgent:
         state_dict = torch.load(os.path.join(__file__[:-13], "pred.pth"), map_location="cpu")
         self.model = ImitationModel(state_dict["model.0.weight"].size(1))
         self.model.load_state_dict(state_dict)
+        self.model.eval()
 
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=True), dtype=torch.float)
@@ -77,9 +73,8 @@ class PreyAgent:
         state_dict = torch.load(os.path.join(__file__[:-13], "prey.pth"), map_location="cpu")
         self.model = ImitationModel(state_dict["model.0.weight"].size(1))
         self.model.load_state_dict(state_dict)
+        self.model.eval()
 
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=False), dtype=torch.float)
         return self.model(xs).squeeze(1).cpu().detach().numpy().tolist()
-
-
