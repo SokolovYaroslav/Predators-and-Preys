@@ -53,7 +53,9 @@ class ImitationDataset(IterableDataset):
             for pred in state["predators"]:
                 common_features.extend((pred["x_pos"], pred["y_pos"]))
             for prey in state["preys"]:
-                features_list.append(common_features + [prey["x_pos"], prey["y_pos"], prey["speed"], float(prey["is_alive"]]))
+                features_list.append(
+                    common_features + [prey["x_pos"], prey["y_pos"], prey["speed"], float(prey["is_alive"])]
+                )
 
         return features_list
 
