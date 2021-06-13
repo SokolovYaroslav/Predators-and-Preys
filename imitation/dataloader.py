@@ -2,17 +2,13 @@ import json
 from typing import List, Tuple
 
 import torch
-from torch.utils.data.dataset import IterableDataset
+from torch.utils.data.dataset import Dataset
 from tqdm.auto import tqdm
 
 
-class ImitationDataset(IterableDataset):
-    def __init__(self, predator: bool):
+class ImitationDataset(Dataset):
+    def __init__(self, predator: bool, dicts: List[dict]):
         self.predator = predator
-        dicts = []
-        with open("imitation/states.jsonl") as f:
-            for line in tqdm(f, desc="Loading file to dataset..."):
-                dicts.append(json.loads(line))
         self.json_dicts = dicts
         self.len = len(dicts)
 

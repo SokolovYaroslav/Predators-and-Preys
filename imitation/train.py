@@ -1,3 +1,5 @@
+import json
+
 import torch
 from torch.nn import MSELoss
 from torch.optim import AdamW
@@ -11,8 +13,12 @@ from imitation.model import ImitationModel
 def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    predator_dataset = ImitationDataset(predator=True)
-    prey_dataset = ImitationDataset(predator=False)
+    dicts = []
+    with open("imitation/states.jsonl") as f:
+        for line in tqdm(f, desc="Loading file to dataset..."):
+            dicts.append(json.loads(line))
+    predator_dataset = ImitationDataset(predator=True, dicts=dicts)
+    prey_dataset = ImitationDataset(predator=False, dicts=dicts)
     predator_dataloader = DataLoader(
         predator_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, shuffle=True
     )
