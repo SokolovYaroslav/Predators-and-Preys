@@ -1,46 +1,38 @@
 import json
-import random
-from typing import List, Iterator, Tuple
+from typing import List, Tuple
 
 import torch
-from torch.utils.data.dataloader import get_worker_info
 from torch.utils.data.dataset import IterableDataset
+from tqdm.auto import tqdm
 
 
 class ImitationDataset(IterableDataset):
     def __init__(self, predator: bool):
         self.predator = predator
-        self.file_path = "imitation/states.jsonl"
-        self.len = 5217272
-        self.bucket_size = 5000
-        self.rng = random.Random(42)
+        dicts = []
+        with open("imitation/states.jsonl") as f:
+            for line in tqdm(f, desc="Loading file to dataset..."):
+                dicts.append(json.loads(line))
+        self.json_dicts = dicts
+        self.len = len(dicts)
 
     def __len__(self):
-        return self.len * (2 if self.predator else 5)
+        return self.len * self._examples_per_dict
 
-    def __iter__(self) -> Iterator[Tuple[torch.Tensor, torch.Tensor]]:
-        worker_info = get_worker_info()
-        worker_id = 0 if worker_info is None else worker_info.id
-        num_workers = 1 if worker_info is None else worker_info.num_workers
+    @property
+    def _examples_per_dict(self) -> int:
+        return 2 if self.predator else 5
 
-        bucket = []
-        with open(self.file_path) as f:
-            for i, line in enumerate(f):
-                if i % num_workers == worker_id:
-                    bucket.extend(self.prepare_line(line))
-                if len(bucket) > self.bucket_size:
-                    self.rng.shuffle(bucket)
-                    yield from bucket
-                    bucket = []
-        if bucket:
-            yield from bucket
-
-    def prepare_line(self, line: str) -> List[Tuple[torch.Tensor, torch.Tensor]]:
-        json_dict = json.loads(line)
-        state, pred_act, prey_act = json_dict["state"], json_dict["pred_act"], json_dict["prey_act"]
+    def __getitem__(self, idx) -> Tuple[List[float], float]:
+        dict_idx, obs_idx = divmod(idx, self._examples_per_dict)
+        state, pred_act, prey_act = (
+            self.json_dicts[dict_idx]["state"],
+            self.json_dicts[dict_idx]["pred_act"],
+            self.json_dicts[dict_idx]["prey_act"],
+        )
         xs = ImitationDataset.prepare_xs(state, self.predator)
         ys = pred_act if self.predator else prey_act
-        return [(torch.tensor(x), torch.tensor(y)) for x, y in zip(xs, ys)]
+        return xs[obs_idx], ys[obs_idx]
 
     @staticmethod
     def prepare_xs(state: dict, predator: bool) -> List[List[float]]:

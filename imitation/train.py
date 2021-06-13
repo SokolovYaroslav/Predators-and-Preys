@@ -13,8 +13,12 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
 
     predator_dataset = ImitationDataset(predator=True)
     prey_dataset = ImitationDataset(predator=False)
-    predator_dataloader = DataLoader(predator_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers)
-    prey_dataloader = DataLoader(prey_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers)
+    predator_dataloader = DataLoader(
+        predator_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, shuffle=True
+    )
+    prey_dataloader = DataLoader(
+        prey_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, shuffle=True
+    )
 
     pred_shape = next(iter(predator_dataset))[0].size(0)
     predator_model = ImitationModel(pred_shape)
