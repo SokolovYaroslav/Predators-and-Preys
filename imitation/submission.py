@@ -5,6 +5,8 @@ from typing import List
 import torch
 from torch import nn
 
+from predators_and_preys_env.env import PredatorsAndPreysEnv
+
 
 class ImitationModel(nn.Module):
     def __init__(self, input_dim: int):
@@ -79,3 +81,20 @@ class PreyAgent:
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=False), dtype=torch.float)
         return self.model(xs).cpu().detach().numpy()
+
+
+def test_main():
+    env = PredatorsAndPreysEnv(render=False)
+    predator_agent = PredatorAgent()
+    prey_agent = PreyAgent()
+
+    state_dict = env.reset()
+    while True:
+        pred_act, prey_act = predator_agent.act(state_dict), prey_agent.act(state_dict)
+        state_dict, _, done = env.step(pred_act, prey_act)
+        if done:
+            break
+
+
+if __name__ == "__main__":
+    test_main()
