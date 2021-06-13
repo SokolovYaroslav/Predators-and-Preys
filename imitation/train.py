@@ -54,6 +54,7 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         for batch in bar:
             prey_opt.zero_grad()
             x, y = batch
+            x, y = x.to(device), y.to(device)
             y_pred = prey_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
