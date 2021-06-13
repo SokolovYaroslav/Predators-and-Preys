@@ -69,6 +69,7 @@ class PredatorAgent:
         state_dict = torch.load(os.path.join(__file__[:-13], "pred.pth"), map_location="cpu")
         self.model = ImitationModel(state_dict["model.0.weight"].size(1))
         self.model.load_state_dict(state_dict)
+        self.model.eval()
 
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=True), dtype=torch.float)
@@ -80,6 +81,7 @@ class PreyAgent:
         state_dict = torch.load(os.path.join(__file__[:-13], "prey.pth"), map_location="cpu")
         self.model = ImitationModel(state_dict["model.0.weight"].size(1))
         self.model.load_state_dict(state_dict)
+        self.model.eval()
 
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=False), dtype=torch.float)
