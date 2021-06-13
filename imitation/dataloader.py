@@ -2,6 +2,7 @@ import json
 import random
 from typing import List, Iterator, Tuple
 
+import numpy as np
 import torch
 from torch.utils.data.dataloader import get_worker_info
 from torch.utils.data.dataset import IterableDataset
@@ -32,7 +33,7 @@ class ImitationDataset(IterableDataset):
         state, pred_act, prey_act = json_dict["state"], json_dict["pred_act"], json_dict["prey_act"]
         xs = ImitationDataset.prepare_xs(state, self.predator)
         ys = pred_act if self.predator else prey_act
-        return [(torch.tensor(x), torch.tensor(y)) for x, y in zip(xs, ys)]
+        return [(torch.tensor(x, dtype=torch.float), torch.tensor(y, dtype=torch.float)) for x, y in zip(xs, ys)]
 
     @staticmethod
     def prepare_xs(state: dict, predator: bool) -> List[List[float]]:
@@ -43,6 +44,9 @@ class ImitationDataset(IterableDataset):
             for prey in state["preys"]:
                 common_features.extend((prey["x_pos"], prey["y_pos"], prey["is_alive"]))
             for pred in state["predators"]:
+                # dists = [ImitationDataset.distance(pred, prey) for prey in state["preys"]]
+                # dirs = [ImitationDataset.direction(pred, prey) for prey in state["preys"]]
+                # features_list.append(common_features + [pred["x_pos"], pred["y_pos"], pred["speed"]] + dists + dirs)
                 features_list.append(common_features + [pred["x_pos"], pred["y_pos"], pred["speed"]])
         else:
             common_features = []
@@ -52,3 +56,11 @@ class ImitationDataset(IterableDataset):
                 features_list.append(common_features + [prey["x_pos"], prey["y_pos"], prey["speed"], prey["is_alive"]])
 
         return features_list
+
+    # @staticmethod
+    # def distance(first, second) -> float:
+    #     return ((first["x_pos"] - second["x_pos"]) ** 2 + (first["y_pos"] - second["y_pos"]) ** 2) ** 0.5
+    #
+    # @staticmethod
+    # def direction(first, second) -> float:
+    #     return np.arctan2(second["y_pos"] - first["y_pos"], second["x_pos"] - first["x_pos"]) / np.pi

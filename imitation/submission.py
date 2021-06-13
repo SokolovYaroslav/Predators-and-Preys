@@ -41,15 +41,18 @@ def prepare_xs(state: dict, predator: bool) -> List[List[float]]:
     if predator:
         common_features = []
         for prey in state["preys"]:
-            common_features.extend((prey["x_pos"], prey["y_pos"]))
+            common_features.extend((prey["x_pos"], prey["y_pos"], prey["is_alive"]))
         for pred in state["predators"]:
+            # dists = [ImitationDataset.distance(pred, prey) for prey in state["preys"]]
+            # dirs = [ImitationDataset.direction(pred, prey) for prey in state["preys"]]
+            # features_list.append(common_features + [pred["x_pos"], pred["y_pos"], pred["speed"]] + dists + dirs)
             features_list.append(common_features + [pred["x_pos"], pred["y_pos"], pred["speed"]])
     else:
         common_features = []
         for pred in state["predators"]:
             common_features.extend((pred["x_pos"], pred["y_pos"]))
         for prey in state["preys"]:
-            features_list.append(common_features + [prey["x_pos"], prey["y_pos"], prey["speed"]])
+            features_list.append(common_features + [prey["x_pos"], prey["y_pos"], prey["speed"], prey["is_alive"]])
 
     return features_list
 
