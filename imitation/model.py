@@ -9,7 +9,13 @@ class ImitationModel(nn.Module):
         super().__init__()
         # self.model = nn.Sequential(nn.Linear(input_dim, 256), nn.ReLU(), nn.Linear(256, 1), nn.Tanh())
         self.model = nn.Sequential(
-            nn.Linear(input_dim, 256), nn.ReLU(), nn.Linear(256, 256), nn.ReLU(), nn.Linear(256, 2)
+            nn.Linear(input_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 512),
+            nn.ReLU(),
+            nn.Linear(512, 256),
+            nn.ReLU(),
+            nn.Linear(256, 2),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
