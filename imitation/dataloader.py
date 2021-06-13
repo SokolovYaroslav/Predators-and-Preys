@@ -43,9 +43,6 @@ class ImitationDataset(IterableDataset):
             for prey in state["preys"]:
                 common_features.extend((prey["x_pos"], prey["y_pos"], float(prey["is_alive"])))
             for pred in state["predators"]:
-                # dists = [ImitationDataset.distance(pred, prey) for prey in state["preys"]]
-                # dirs = [ImitationDataset.direction(pred, prey) for prey in state["preys"]]
-                # features_list.append(common_features + [pred["x_pos"], pred["y_pos"], pred["speed"]] + dists + dirs)
                 features_list.append(common_features + [pred["x_pos"], pred["y_pos"], pred["speed"]])
         else:
             common_features = []
@@ -57,11 +54,3 @@ class ImitationDataset(IterableDataset):
                 )
 
         return features_list
-
-    # @staticmethod
-    # def distance(first, second) -> float:
-    #     return ((first["x_pos"] - second["x_pos"]) ** 2 + (first["y_pos"] - second["y_pos"]) ** 2) ** 0.5
-    #
-    # @staticmethod
-    # def direction(first, second) -> float:
-    #     return np.arctan2(second["y_pos"] - first["y_pos"], second["x_pos"] - first["x_pos"]) / np.pi

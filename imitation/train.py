@@ -67,4 +67,4 @@ def train(path, pred_epochs=100, prey_epochs=3, batch_size=2048, num_workers=15,
 
 if __name__ == "__main__":
     train("imitation/states_small.jsonl", pred_epochs=1, prey_epochs=1)
-    # train("imitation/states.jsonl", pred_epochs=100, prey_epochs=5)
+    train("imitation/states.jsonl", pred_epochs=100, prey_epochs=5)

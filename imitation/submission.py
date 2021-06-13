@@ -14,10 +14,13 @@ class ImitationModel(nn.Module):
         self.model = nn.Sequential(
             nn.Linear(input_dim, 256),
             nn.ReLU(),
+            nn.LayerNorm(256),
             nn.Linear(256, 512),
             nn.ReLU(),
+            nn.LayerNorm(512),
             nn.Linear(512, 256),
             nn.ReLU(),
+            nn.LayerNorm(256),
             nn.Linear(256, 1),
             nn.Tanh(),
         )
