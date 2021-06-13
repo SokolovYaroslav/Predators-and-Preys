@@ -2,7 +2,6 @@ import json
 import random
 from typing import List, Iterator, Tuple
 
-import numpy as np
 import torch
 from torch.utils.data.dataloader import get_worker_info
 from torch.utils.data.dataset import IterableDataset
