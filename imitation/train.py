@@ -26,7 +26,7 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         prey_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, shuffle=True
     )
 
-    pred_shape = next(iter(predator_dataset))[0].size(0)
+    pred_shape = len(predator_dataset[0][0])
     predator_model = ImitationModel(pred_shape)
     predator_model = predator_model.to(device)
     predator_opt = AdamW(predator_model.parameters(), lr)
