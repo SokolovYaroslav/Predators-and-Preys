@@ -35,12 +35,12 @@ class ImitationDataset(IterableDataset):
         if bucket:
             yield from bucket
 
-    def prepare_line(self, line: str) -> List[Tuple[List[float], float]]:
+    def prepare_line(self, line: str) -> List[Tuple[torch.Tensor, torch.Tensor]]:
         json_dict = json.loads(line)
         state, pred_act, prey_act = json_dict["state"], json_dict["pred_act"], json_dict["prey_act"]
         xs = ImitationDataset.prepare_xs(state, self.predator)
         ys = pred_act if self.predator else prey_act
-        return list(zip(xs, ys))
+        return [(torch.tensor(x), torch.tensor(y)) for x, y in zip(xs, ys)]
 
     @staticmethod
     def prepare_xs(state: dict, predator: bool) -> List[List[float]]:

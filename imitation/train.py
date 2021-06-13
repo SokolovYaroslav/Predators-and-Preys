@@ -14,11 +14,6 @@ from imitation.model import ImitationModel
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def collate_fn(batch: List[Tuple[List[float], float]]) -> Tuple[torch.Tensor, torch.Tensor]:
-    xs, ys = zip(*batch)
-    return torch.tensor(xs, dtype=torch.float), torch.tensor(ys, dtype=torch.float).unsqueeze(1)
-
-
 def train(path, epochs=100, batch_size=2048, num_workers=8, lr=1e-3):
     predator_dataset = ImitationDataset(predator=True, path=path)
     prey_dataset = ImitationDataset(predator=False, path=path)
@@ -27,14 +22,12 @@ def train(path, epochs=100, batch_size=2048, num_workers=8, lr=1e-3):
         batch_size=batch_size,
         pin_memory=True,
         num_workers=num_workers,
-        collate_fn=collate_fn,
     )
     prey_dataloader = DataLoader(
         prey_dataset,
         batch_size=batch_size,
         pin_memory=True,
         num_workers=num_workers,
-        collate_fn=collate_fn,
     )
 
     pred_shape = len(next(iter(predator_dataset))[0])
@@ -58,7 +51,7 @@ def train(path, epochs=100, batch_size=2048, num_workers=8, lr=1e-3):
         for batch in bar:
             predator_opt.zero_grad()
             x, y = batch
-            x, y = x.to(device), y.to(device)
+            x, y = x.to(device), y.to(device).unsqueeze(1)
             y_pred = predator_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
@@ -75,7 +68,7 @@ def train(path, epochs=100, batch_size=2048, num_workers=8, lr=1e-3):
         for batch in bar:
             prey_opt.zero_grad()
             x, y = batch
-            x, y = x.to(device), y.to(device)
+            x, y = x.to(device), y.to(device).unsqueeze(1)
             y_pred = prey_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
