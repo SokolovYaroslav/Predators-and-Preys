@@ -69,7 +69,7 @@ class PredatorAgent:
 
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=True), dtype=torch.float)
-        return self.model(xs).cpu().detach().numpy()
+        return self.model(xs).cpu().detach().numpy().tolist()
 
 
 class PreyAgent:
@@ -80,6 +80,6 @@ class PreyAgent:
 
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=False), dtype=torch.float)
-        return self.model(xs).cpu().detach().numpy()
+        return self.model(xs).cpu().detach().numpy().tolist()
 
 
