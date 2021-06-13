@@ -20,7 +20,7 @@ def collate_fn(batch: List[Tuple[List[float], float]]) -> Tuple[List[List[float]
 
 def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
     dicts = []
-    with open("imitation/states.jsonl") as f:
+    with open("imitation/states_small.jsonl") as f:
         for line in tqdm(f, desc="Loading file to dataset..."):
             dicts.append(json.loads(line))
     predator_dataset = ImitationDataset(predator=True, dicts=dicts)
@@ -63,7 +63,10 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         for batch in bar:
             predator_opt.zero_grad()
             x, y = batch
-            x, y = torch.tensor(x, device=device, dtype=torch.float), torch.tensor(y, device=device, dtype=torch.float)
+            x, y = (
+                torch.tensor(x, device=device, dtype=torch.float),
+                torch.tensor(y, device=device, dtype=torch.float).unsqueeze(1),
+            )
             y_pred = predator_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
@@ -80,7 +83,10 @@ def train(epochs=100, batch_size=2048, num_workers=8, lr=1e-4):
         for batch in bar:
             prey_opt.zero_grad()
             x, y = batch
-            x, y = torch.tensor(x, device=device, dtype=torch.float), torch.tensor(y, device=device, dtype=torch.float)
+            x, y = (
+                torch.tensor(x, device=device, dtype=torch.float),
+                torch.tensor(y, device=device, dtype=torch.float).unsqueeze(1),
+            )
             y_pred = prey_model(x)
             loss = loss_fn(y, y_pred)
             loss.backward()
