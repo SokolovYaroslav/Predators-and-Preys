@@ -1,31 +1,46 @@
-from typing import List, Tuple
+import json
+import random
+from typing import List, Iterator, Tuple
 
-from torch.utils.data.dataset import Dataset
+import torch
+from torch.utils.data.dataloader import get_worker_info
+from torch.utils.data.dataset import IterableDataset
 
 
-class ImitationDataset(Dataset):
-    def __init__(self, predator: bool, dicts: List[dict]):
+class ImitationDataset(IterableDataset):
+    def __init__(self, predator: bool, path: str):
         self.predator = predator
-        self.json_dicts = dicts
-        self.len = len(dicts)
+        self.file_path = path
+        self.len = 5217272
+        self.bucket_size = 5000
+        self.rng = random.Random(42)
 
     def __len__(self):
-        return self.len * self._examples_per_dict
+        return self.len * (2 if self.predator else 5)
 
-    @property
-    def _examples_per_dict(self) -> int:
-        return 2 if self.predator else 5
+    def __iter__(self) -> Iterator[Tuple[torch.Tensor, torch.Tensor]]:
+        worker_info = get_worker_info()
+        worker_id = 0 if worker_info is None else worker_info.id
+        num_workers = 1 if worker_info is None else worker_info.num_workers
 
-    def __getitem__(self, idx) -> Tuple[List[float], float]:
-        dict_idx, obs_idx = divmod(idx, self._examples_per_dict)
-        state, pred_act, prey_act = (
-            self.json_dicts[dict_idx]["state"],
-            self.json_dicts[dict_idx]["pred_act"],
-            self.json_dicts[dict_idx]["prey_act"],
-        )
+        bucket = []
+        with open(self.file_path) as f:
+            for i, line in enumerate(f):
+                if i % num_workers == worker_id:
+                    bucket.extend(self.prepare_line(line))
+                if len(bucket) > self.bucket_size:
+                    self.rng.shuffle(bucket)
+                    yield from bucket
+                    bucket = []
+        if bucket:
+            yield from bucket
+
+    def prepare_line(self, line: str) -> List[Tuple[List[float], float]]:
+        json_dict = json.loads(line)
+        state, pred_act, prey_act = json_dict["state"], json_dict["pred_act"], json_dict["prey_act"]
         xs = ImitationDataset.prepare_xs(state, self.predator)
         ys = pred_act if self.predator else prey_act
-        return xs[obs_idx], ys[obs_idx]
+        return list(zip(xs, ys))
 
     @staticmethod
     def prepare_xs(state: dict, predator: bool) -> List[List[float]]:
