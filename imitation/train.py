@@ -4,7 +4,7 @@ import torch
 from torch.nn import MSELoss
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
-from tqdm.auto import tqdm
+from tqdm import tqdm
 
 from imitation.dataloader import ImitationDataset
 from imitation.model import ImitationModel
