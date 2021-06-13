@@ -1,6 +1,7 @@
 import torch
 from torch.nn import MSELoss
 from torch.optim import AdamW
+from torch.optim.lr_scheduler import MultiplicativeLR
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -25,16 +26,20 @@ def train(path, pred_epochs=100, prey_epochs=3, batch_size=2048, num_workers=15,
     predator_model = ImitationModel(pred_shape)
     predator_model = predator_model.to(device)
     predator_opt = AdamW(predator_model.parameters(), lr)
+    predator_sched = MultiplicativeLR(predator_opt, lambda epoch: 0.95)
 
     prey_shape = len(next(iter(prey_dataset))[0])
     prey_model = ImitationModel(prey_shape)
     prey_model = prey_model.to(device)
     prey_opt = AdamW(prey_model.parameters(), lr)
+    prey_sched = MultiplicativeLR(prey_opt, lambda epoch: 0.95)
 
     loss_fn = MSELoss()
 
+    print(predator_model)
+    print(prey_model)
+
     for i in range(max(pred_epochs, prey_epochs)):
-        print(predator_model)
         if i < pred_epochs:
             bar = tqdm(predator_dataloader)
             for batch in bar:
@@ -46,9 +51,9 @@ def train(path, pred_epochs=100, prey_epochs=3, batch_size=2048, num_workers=15,
                 loss.backward()
                 predator_opt.step()
                 bar.set_description(f"Epoch {i}: predator mse {loss.item():.3f}")
+            predator_sched.step()
             torch.save(predator_model.state_dict(), f"pred_epoch_{i}.pth")
 
-        print(prey_model)
         if i < prey_epochs:
             bar = tqdm(prey_dataloader)
             for batch in bar:
@@ -60,6 +65,7 @@ def train(path, pred_epochs=100, prey_epochs=3, batch_size=2048, num_workers=15,
                 loss.backward()
                 prey_opt.step()
                 bar.set_description(f"Epoch {i}: prey mse {loss.item():.3f}")
+            prey_sched.step()
             torch.save(prey_model.state_dict(), f"prey_epoch_{i}.pth")
 
     predator_opt.zero_grad()
