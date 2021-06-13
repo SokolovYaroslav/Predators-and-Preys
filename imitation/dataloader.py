@@ -12,7 +12,6 @@ class ImitationDataset(IterableDataset):
         self.predator = predator
         self.file_path = path
         self.len = 5217272
-        self.bucket_size = 5000
         self.rng = random.Random(42)
 
     def __len__(self):
@@ -23,17 +22,10 @@ class ImitationDataset(IterableDataset):
         worker_id = 0 if worker_info is None else worker_info.id
         num_workers = 1 if worker_info is None else worker_info.num_workers
 
-        bucket = []
         with open(self.file_path) as f:
             for i, line in enumerate(f):
                 if i % num_workers == worker_id:
-                    bucket.extend(self.prepare_line(line))
-                if len(bucket) > self.bucket_size:
-                    self.rng.shuffle(bucket)
-                    yield from bucket
-                    bucket = []
-        if bucket:
-            yield from bucket
+                    yield from self.prepare_line(line)
 
     def prepare_line(self, line: str) -> List[Tuple[torch.Tensor, torch.Tensor]]:
         json_dict = json.loads(line)
