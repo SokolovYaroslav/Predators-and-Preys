@@ -18,16 +18,10 @@ def train(path, epochs=100, batch_size=2048, num_workers=8, lr=1e-3):
     predator_dataset = ImitationDataset(predator=True, path=path)
     prey_dataset = ImitationDataset(predator=False, path=path)
     predator_dataloader = DataLoader(
-        predator_dataset,
-        batch_size=batch_size,
-        pin_memory=True,
-        num_workers=num_workers,
+        predator_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, drop_last=True
     )
     prey_dataloader = DataLoader(
-        prey_dataset,
-        batch_size=batch_size,
-        pin_memory=True,
-        num_workers=num_workers,
+        prey_dataset, batch_size=batch_size, pin_memory=True, num_workers=num_workers, drop_last=True
     )
 
     pred_shape = len(next(iter(predator_dataset))[0])
