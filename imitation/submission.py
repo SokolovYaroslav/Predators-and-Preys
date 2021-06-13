@@ -21,23 +21,15 @@ class ImitationModel(nn.Module):
             nn.Linear(512, 256),
             nn.ReLU(),
             nn.LayerNorm(256),
-            nn.Linear(256, 1),
-            nn.Tanh(),
+            # nn.Linear(256, 1),
+            # nn.Tanh(),
+            nn.Linear(256, 2),
         )
-        # self.model = nn.Sequential(
-        #     nn.Linear(input_dim, 256),
-        #     nn.ReLU(),
-        #     nn.Linear(256, 512),
-        #     nn.ReLU(),
-        #     nn.Linear(512, 256),
-        #     nn.ReLU(),
-        #     nn.Linear(256, 2),
-        # )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.model(x)
-        # xy = self.model(x)
-        # return torch.atan2(xy[:, 0], xy[:, 1]) / math.pi
+        # return self.model(x)
+        xy = self.model(x)
+        return torch.atan2(xy[:, 0], xy[:, 1]).unsqueeze(1) / math.pi
 
 
 def prepare_xs(state: dict, predator: bool) -> List[List[float]]:
@@ -86,5 +78,3 @@ class PreyAgent:
     def act(self, state_dict):
         xs = torch.tensor(prepare_xs(state_dict, predator=False), dtype=torch.float)
         return self.model(xs).squeeze(1).cpu().detach().numpy().tolist()
-
-
